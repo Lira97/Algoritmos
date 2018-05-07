@@ -12,7 +12,8 @@ public class TravelingSalesman
 	
 	public static void TSPbruteForce(String file)
 		{
-			Scanner s = new Scanner (System.in);//leemos el archivo 
+			long startTime = System.currentTimeMillis();
+			Scanner s = new Scanner (System.in);//leemos el archivo
 			int[] Array = readFiles(file);
 			n = Array[0];
 			weight = new int[n][n];//le damos el tañano a los arreglos y la matriz 
@@ -41,7 +42,7 @@ public class TravelingSalesman
 				weight[i][j] = w;
 			}
 		}
-		long startTime = System.currentTimeMillis();
+
 		bruteForce();//iniciamos  el algoritmo de furza bruta 
 		//Time calculation
 			long endTime = System.currentTimeMillis();
@@ -215,12 +216,14 @@ public class TravelingSalesman
 				
 			
 			}
-	private static class Index {
-		int currentVertex;
-		Set<Integer> vertexSet;
+	private static class Index //creamos la clase index
+	{
+		int currentVertex;//creamos el nodo inicial
+		Set<Integer> vertexSet;//cremos un conjunto de nodos
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(Object o)
+		{
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 
@@ -231,38 +234,42 @@ public class TravelingSalesman
 		}
 
 		@Override
-		public int hashCode() {
+		public int hashCode()
+		{
 			int result = currentVertex;
 			result = 31 * result + (vertexSet != null ? vertexSet.hashCode() : 0);
 			return result;
 		}
 
-		private static Index createIndex(int vertex, Set<Integer> vertexSet) {
-			Index i = new Index();
-			i.currentVertex = vertex;
-			i.vertexSet = vertexSet;
+		private static Index createIndex(int vertex, Set<Integer> vertexSet) //funcion para crear el idice
+		{
+			Index i = new Index();//cremos un objeto indice
+			i.currentVertex = vertex;//el nodo de currentVertex sera el nodo que le pasamos a la funcion
+			i.vertexSet = vertexSet;// veterxSet sera el nuevo conjunto de elemntos que el pasamos
 			return i;
 		}
 	}
 
-	private static class SetSizeComparator implements Comparator<Set<Integer>>{
+	private static class SetSizeComparator implements Comparator<Set<Integer>>//funcion para comparar los tamanos de los conjuntos
+	{
 		@Override
 		public int compare(Set<Integer> o1, Set<Integer> o2) {
 			return o1.size() - o2.size();
 		}
 	}
 
-	public Double minCost(double[][] distance) {
+	public Double minCost(double[][] distance)
+	{
 
-		//stores intermediate values in map
-		Map<Index, Double> minCostDP = new HashMap<>();
-		Map<Index, Integer> parent = new HashMap<>();
+		Map<Index, Double> minCostDP = new HashMap<>();//creamos un mapa para guradar los costo minimos que vayamos analizando
+		Map<Index, Integer> parent = new HashMap<>();//creamos un mapa para guradar los padres que vayamos analizando
 
-		List<Set<Integer>> allSets = generateCombination(distance.length - 1);
+		List<Set<Integer>> allSets = generateCombination(distance.length - 1);//generaremos todos las combinaciones y las gurdaremos en una lista
 
-		for(Set<Integer> set : allSets) {
-			for(int currentVertex = 1; currentVertex < distance.length; currentVertex++) {
-				if(set.contains(currentVertex)) {
+		for(Set<Integer> set : allSets) {//despues vamos a iterar por cada conjunto generado
+			for(int currentVertex = 1; currentVertex < distance.length; currentVertex++)
+			{
+				if(set.contains(currentVertex)) {//si nodo ya fue evaluado entonces lo ignorara
 					continue;
 				}
 				Index index = Index.createIndex(currentVertex, set);
@@ -270,112 +277,116 @@ public class TravelingSalesman
 				int minPrevVertex = 0;
 				//to avoid ConcurrentModificationException copy set into another set while iterating
 				Set<Integer> copySet = new HashSet<>(set);
-				for(int prevVertex : set) {
-					double cost = distance[prevVertex][currentVertex] + getCost(copySet, prevVertex, minCostDP);
-					if(cost < minCost) {
-						minCost = cost;
-						minPrevVertex = prevVertex;
+				for(int prevVertex : set) {//por cada nodo anteriro creado
+					double cost = distance[prevVertex][currentVertex] + getCost(copySet, prevVertex, minCostDP);//el costo sera la dsitacioa masl el cosnto genrado
+					if(cost < minCost) {//si el costo el menor al costo minmo
+						minCost = cost;//costo minimo lo igualamos al costo
+						minPrevVertex = prevVertex;//el igualamos el el nodo anterior
 					}
 				}
-				//this happens for empty subset
-				if(set.size() == 0) {
-					minCost = distance[0][currentVertex];
+
+				if(set.size() == 0) {//si el subset esta vacio entoces le damos el valor de la distcion acutal en 0
+					minCost = distance[0][currentVertex];//agregamos el csoto del valor en cero
 				}
-				minCostDP.put(index, minCost);
-				parent.put(index, minPrevVertex);
+				minCostDP.put(index, minCost);//agregamos el costo minmo
+				parent.put(index, minPrevVertex);//agregamos el padre
 			}
 		}
 
 		Set<Integer> set = new HashSet<>();
 		for(int i=1; i < distance.length; i++) {
-			set.add(i);
+			set.add(i);//vamos anadiendo
 		}
-		double min = Double.MAX_VALUE;
+		double min = Double.MAX_VALUE;//de damos el valor del infinito
 		int prevVertex = -1;
-		//to avoid ConcurrentModificationException copy set into another set while iterating
-		Set<Integer> copySet = new HashSet<>(set);
+		Set<Integer> copySet = new HashSet<>(set);//copiamos el hsah generado
 		for(int k : set) {
-			double cost = distance[k][0] + getCost(copySet, k, minCostDP);
-			if(cost < min) {
-				min = cost;
-				prevVertex = k;
+			double cost = distance[k][0] + getCost(copySet, k, minCostDP);//agregamos el costo
+			if(cost < min) {//si el csoto el menor al minmo
+				min = cost;//agregamos el costo minmo
+				prevVertex = k;//agregamos el padre
 			}
 		}
 
-		parent.put(Index.createIndex(0, set), prevVertex);
-		printTour(parent, distance.length);
-		return min;
+		parent.put(Index.createIndex(0, set), prevVertex);//agregamos el padre
+		printTour(parent, distance.length);//impirmo el camino
+		return min;//regresmo el csoto minmo
 	}
 
-	private void printTour(Map<Index, Integer> parent, int totalVertices) {
+	private void printTour(Map<Index, Integer> parent, int totalVertices)//imprimimos el camino
+	{
 		Set<Integer> set = new HashSet<>();
-		for(int i=0; i < totalVertices; i++) {
-			set.add(i);
+		for(int i=0; i < totalVertices; i++) //pasamos por todos los veritices
+		{
+			set.add(i);//anadimos los nodos
 		}
 		Integer start = 0;
 		Deque<Integer> stack = new LinkedList<>();
-		while(true) {
-			stack.push(start);
-			set.remove(start);
-			start = parent.get(Index.createIndex(start, set));
-			if(start == null) {
+		while(true)
+		{
+			stack.push(start);//agremos al srtack el valor del nodo inicio
+			set.remove(start);//removemos el nodo incion
+			start = parent.get(Index.createIndex(start, set));//obtemos el padre
+			if(start == null)
+			{
 				break;
 			}
 		}
 		StringJoiner joiner = new StringJoiner("->");
-		stack.forEach(v -> joiner.add(String.valueOf(v)));
+		stack.forEach(v -> joiner.add(String.valueOf(v)));//for cada volor en el stack
 		System.out.println("\nTSP Dinamico");
-		System.out.println(joiner.toString());
+		System.out.println(joiner.toString());//imprimos todos los valores del estack
 	}
 
 	private double getCost(Set<Integer> set, int prevVertex, Map<Index, Double> minCostDP) {
-		set.remove(prevVertex);
-		Index index = Index.createIndex(prevVertex, set);
-		double cost = minCostDP.get(index);
-		set.add(prevVertex);
-		return cost;
+		set.remove(prevVertex);//quitamos el valor anterior
+		Index index = Index.createIndex(prevVertex, set);//cresmo unnuevo indice para el valor anterior
+		double cost = minCostDP.get(index);//regresmo el costo del arreglo indice
+		set.add(prevVertex);//anadimos el nodo
+		return cost;//regresmo el costo generados
 	}
 
-	private List<Set<Integer>> generateCombination(int n) {
+	private List<Set<Integer>> generateCombination(int n)
+	{
 		int input[] = new int[n];
 		for(int i = 0; i < input.length; i++) {
-			input[i] = i+1;
+			input[i] = i+1;//itermos todos los elemntos menos el primero
 		}
-		List<Set<Integer>> allSets = new ArrayList<>();
-		int result[] = new int[input.length];
-		generateCombination(input, 0, 0, allSets, result);
-		Collections.sort(allSets, new SetSizeComparator());
+		List<Set<Integer>> allSets = new ArrayList<>();//cremos una lista donde estatn todos los conjuntos
+		int result[] = new int[input.length]; //le damos el mimo tamano al arreglo result
+		generateCombination(input, 0, 0, allSets, result);//por medio de la funcoi crearcombinacion agramos los conjuntos
+		Collections.sort(allSets, new SetSizeComparator());//los comparamos y los ordenamos
 		return allSets;
 	}
 
-	private void generateCombination(int input[], int start, int pos, List<Set<Integer>> allSets, int result[]) {
-		if(pos == input.length) {
+	private void generateCombination(int input[], int start, int pos, List<Set<Integer>> allSets, int result[]) {//funcion para generar todoas las combinaciones de los conjuntos
+		if(pos == input.length) {//si se llega al inicio entonces nos salimos de la funcion
 			return;
 		}
-		Set<Integer> set = createSet(result, pos);
-		allSets.add(set);
-		for(int i=start; i < input.length; i++) {
-			result[pos] = input[i];
-			generateCombination(input, i+1, pos+1, allSets, result);
+		Set<Integer> set = createSet(result, pos);//cremos el conjunto para eso entramos al funcion crear conjunto
+		allSets.add(set);//agremaos el conjubto creado
+		for(int i=start; i < input.length; i++) {//iteramos del inicio hata el tamano del arreglo input
+			result[pos] = input[i];//
+			generateCombination(input, i+1, pos+1, allSets, result);//volvemoa entrar para seguir genrando los conjuntos
 		}
 	}
 
 	private static Set<Integer> createSet(int input[], int pos) {
 		if(pos == 0) {
-			return new HashSet<>();
+			return new HashSet<>();//si la posicion es el inicio entoces regresmao el hash
 		}
-		Set<Integer> set = new HashSet<>();
+		Set<Integer> set = new HashSet<>();//cremos un hash
 		for(int i = 0; i < pos; i++) {
-			set.add(input[i]);
+			set.add(input[i]);//vamos anadiendo los conjuntos
 		}
-		return set;
+		return set;//regresamos los conjuntos
 	}
 		
 	public static void main(String[] args) throws Exception 
 	{
 				TravelingSalesman ciudades = new TravelingSalesman(); 
-				ciudades.TSPdinamico("P4tsp4.txt");	
-				ciudades.TSPbruteForce("P4tsp4.txt");			
+				ciudades.TSPdinamico("P4tsp10.txt");
+				ciudades.TSPbruteForce("P4tsp10.txt");
 	}
 }
 
