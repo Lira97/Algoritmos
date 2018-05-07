@@ -76,7 +76,7 @@ public class TravelingSalesman
 		{
 		if (size == 0)//si no tine un tamaño   
 		return weight[currentCity][0];// regresamos el peso 
-		int min=999999;//asignamos un infinito
+		int min=999999;//asignamos un minimo
 		int minIndex = 0;//asignamos un un indice para el minimo
 		int setToCost[] = new int[n-1];//cremos un arreglo para guardar los costos 
 		for (int i = 0; i < size; i++)
@@ -86,11 +86,11 @@ public class TravelingSalesman
 			{
 				if(input[i] != input[j])//si el dato es diferente al que estamos analizando 
 					{
-					setToCost[k++] = input[j];//lo agrramo al costo
+					setToCost[k++] = input[j];//lo agregamos al costo
 					}
 			}
 			int tmp = getCost(input[i], setToCost, size-1);// creamos una varible temporal y volvemos a evaluar el costo 
-			if((weight[currentCity][input[i]]+tmp)<min)//si el peso de la ciudad es menor al infinito 
+			if((weight[currentCity][input[i]]+tmp)<min)//si el peso de la ciudad es menor al costo minom
 			{
 				min = weight[currentCity][input[i]]+tmp;//ahora el minimo es el peso de la ciudad 
 				minIndex = input[i];//y el indice sera el valor del set que se analizo 
